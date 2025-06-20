@@ -7,13 +7,18 @@ function renderSections() {
     let html = `<div class="section-block"><label>${item.type.toUpperCase()}</label>`;
 
     if (item.type === "normal") {
-      html += `<textarea data-idx="${idx}" data-field="text" placeholder="Text">${item.text || ""}</textarea>`;
+      html += `<textarea data-idx="${idx}" data-field="text" placeholder="Text" required>${item.text || ""}</textarea>`;
     } else {
-      html += `<input type="text" data-idx="${idx}" data-field="reference" placeholder="Reference" value="${item.reference || ""}"/>`;
+      const isRefRequired = item.type === "quran" || item.type === "sunnah";
+      const isTextRequired = true;
+
+      html += `<input type="text" data-idx="${idx}" data-field="reference" placeholder="Reference" value="${item.reference || ""}" ${isRefRequired ? 'required' : ''}/>`;
+      
       if (item.type === "sunnah") {
         html += `<input type="text" data-idx="${idx}" data-field="narrator" placeholder="Narrator" value="${item.narrator || ""}"/>`;
       }
-      html += `<textarea data-idx="${idx}" data-field="text" placeholder="Text">${item.text || ""}</textarea>`;
+
+      html += `<textarea data-idx="${idx}" data-field="text" placeholder="Text" ${isTextRequired ? 'required' : ''}>${item.text || ""}</textarea>`;
       html += `<textarea data-idx="${idx}" data-field="commentary" placeholder="Commentary">${item.commentary || ""}</textarea>`;
     }
 
