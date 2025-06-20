@@ -80,12 +80,12 @@ document.getElementById("qa-form").onsubmit = function (e) {
 //edit backend link here
   const lang = document.getElementById('qa-language').value;
 const endpoint = lang === 'ar' ? '/api/admin/submit_ar' : '/api/admin/submit';
-
+console.log(endpoint);
 fetch(`https://asksunnah-backend-16oi.onrender.com${endpoint}`, {
   method: "POST",
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(qa)
-})
+})  
   .then(async res => {
     if (!res.ok) {
       const text = await res.text(); // 🔄 Read raw response
