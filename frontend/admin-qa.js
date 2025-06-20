@@ -1,99 +1,101 @@
-/* admin-qa.js */
-let sections = [];
+let sections = []; // Interleaved blocks (quran, sunnah, normal, etc.)
 
 function renderSections() {
-    const container = document.getElementById('dynamic-sections');
-    container.innerHTML = "";
-    sections.forEach((section, idx) => {
-        let html = `<div class="section-block"><h4>${section.type}</h4>`;
+  const container = document.getElementById("dynamic-sections");
+  container.innerHTML = "";
+  sections.forEach((item, idx) => {
+    let html = `<div class="section-block"><label>${item.type.toUpperCase()}</label>`;
 
-        if (section.type === "quran") {
-            html += `
-                <input type="text" placeholder="Reference" value="${section.reference || ''}" oninput="updateField(${idx}, 'reference', this.value)" required>
-                <textarea placeholder="Verse Text" oninput="updateField(${idx}, 'text', this.value)" required>${section.text || ''}</textarea>
-                <textarea placeholder="Commentary (optional)" oninput="updateField(${idx}, 'commentary', this.value)">${section.commentary || ''}</textarea>
-            `;
-        } else if (section.type === "sunnah") {
-            html += `
-                <input type="text" placeholder="Reference" value="${section.reference || ''}" oninput="updateField(${idx}, 'reference', this.value)" required>
-                <input type="text" placeholder="Narrator (optional)" value="${section.narrator || ''}" oninput="updateField(${idx}, 'narrator', this.value)">
-                <textarea placeholder="Hadith Text" oninput="updateField(${idx}, 'text', this.value)" required>${section.text || ''}</textarea>
-                <textarea placeholder="Commentary (optional)" oninput="updateField(${idx}, 'commentary', this.value)">${section.commentary || ''}</textarea>
-            `;
-        } else if (section.type === "salaf" || section.type === "scholar") {
-            html += `
-                <textarea placeholder="Text" oninput="updateField(${idx}, 'text', this.value)" required>${section.text || ''}</textarea>
-                <input type="text" placeholder="Reference (optional)" value="${section.reference || ''}" oninput="updateField(${idx}, 'reference', this.value)">
-            `;
-        } else if (section.type === "normal") {
-            html += `
-                <textarea placeholder="Text" oninput="updateField(${idx}, 'text', this.value)">${section.text || ''}</textarea>
-            `;
-        }
-
-        html += `
-            <div class="section-btns">
-                <button type="button" onclick="moveSection(${idx}, -1)">↑</button>
-                <button type="button" onclick="moveSection(${idx}, 1)">↓</button>
-                <button type="button" onclick="deleteSection(${idx})">Delete</button>
-            </div>
-        </div>`;
-        container.innerHTML += html;
-    });
-}
-
-function updateField(index, key, value) {
-    sections[index][key] = value;
-}
-
-document.getElementById('add-section-btn').onclick = () => {
-    const type = document.getElementById('section-type').value;
-    const newSection = { type };
-
-    // Required initial structure
-    if (type === "quran" || type === "sunnah") {
-        newSection.reference = "";
-        newSection.text = "";
-        newSection.commentary = "";
-        if (type === "sunnah") newSection.narrator = "";
-    } else if (type === "salaf" || type === "scholar") {
-        newSection.text = "";
-        newSection.reference = "";
-    } else if (type === "normal") {
-        newSection.text = "";
+    if (item.type === "normal") {
+      html += `<textarea data-idx="${idx}" data-field="text" placeholder="Text">${item.text || ""}</textarea>`;
+    } else {
+      html += `<input type="text" data-idx="${idx}" data-field="reference" placeholder="Reference" value="${item.reference || ""}"/>`;
+      if (item.type === "sunnah") {
+        html += `<input type="text" data-idx="${idx}" data-field="narrator" placeholder="Narrator" value="${item.narrator || ""}"/>`;
+      }
+      html += `<textarea data-idx="${idx}" data-field="text" placeholder="Text">${item.text || ""}</textarea>`;
+      html += `<textarea data-idx="${idx}" data-field="commentary" placeholder="Commentary">${item.commentary || ""}</textarea>`;
     }
 
-    sections.push(newSection);
-    renderSections();
+    html += `
+      <div class="section-btns">
+        <button type="button" onclick="moveSection(${idx}, -1)">↑</button>
+        <button type="button" onclick="moveSection(${idx}, 1)">↓</button>
+        <button type="button" onclick="deleteSection(${idx})">Delete</button>
+      </div></div>`;
+    container.innerHTML += html;
+  });
+
+  document.querySelectorAll(".section-block textarea, .section-block input").forEach(input => {
+    input.oninput = function () {
+      const idx = this.dataset.idx;
+      const field = this.dataset.field;
+      sections[idx][field] = this.value;
+    };
+  });
+}
+
+window.addSection = function () {
+  const type = document.getElementById("section-type").value;
+  const newBlock = { type, text: "" };
+  if (type !== "normal") newBlock.reference = "";
+  if (type === "sunnah") newBlock.narrator = "";
+  if (type !== "normal") newBlock.commentary = "";
+  sections.push(newBlock);
+  renderSections();
 };
 
-function deleteSection(idx) {
-    sections.splice(idx, 1);
-    renderSections();
-}
+window.deleteSection = function (idx) {
+  sections.splice(idx, 1);
+  renderSections();
+};
 
-function moveSection(idx, direction) {
-    if ((idx === 0 && direction === -1) || (idx === sections.length - 1 && direction === 1)) return;
-    [sections[idx], sections[idx + direction]] = [sections[idx + direction], sections[idx]];
-    renderSections();
-}
+window.moveSection = function (idx, direction) {
+  if ((idx === 0 && direction === -1) || (idx === sections.length - 1 && direction === 1)) return;
+  [sections[idx], sections[idx + direction]] = [sections[idx + direction], sections[idx]];
+  renderSections();
+};
 
-document.getElementById('qa-form').onsubmit = function (e) {
-    e.preventDefault();
-    const payload = {
-        title: document.getElementById('qa-title').value,
-        slug: document.getElementById('qa-slug').value,
-        question: document.getElementById('qa-question').value,
-        answer: document.getElementById('qa-answer').value,
-        conclusion: document.getElementById('qa-conclusion').value,
-        content: sections
-    };
+document.getElementById("add-section-btn").onclick = addSection;
 
-    console.log("Submitting this Q&A:", JSON.stringify(payload, null, 2));
-    document.getElementById('save-message').innerText = "Saved! (see console for data)";
-    this.reset();
+document.getElementById("qa-form").onsubmit = function (e) {
+  e.preventDefault();
+
+    const qa = {
+    title: document.getElementById('qa-title').value,
+    slug: document.getElementById('qa-slug').value,
+    question: document.getElementById('qa-question').value,
+    answer: document.getElementById('qa-answer').value,
+    conclusion: document.getElementById('qa-conclusion').value,
+    content: sections // <- send full interleaved array
+  };
+
+
+  console.log("Submitting this Q&A:", qa);
+//edit backend link here
+  fetch('https://asksunnah-backend-16oi.onrender.com/api/admin/submit', {
+  method: "POST",
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify(qa)
+})
+  .then(async res => {
+    if (!res.ok) {
+      const text = await res.text(); // 🔄 Read raw response
+      throw new Error("Server error: " + text); // 🧠 Show the actual error response (even if HTML)
+    }
+    return res.json(); // ✅ Only parse if response is OK and JSON
+  })
+  .then(data => {
+    document.getElementById('save-message').innerText = "Saved successfully!";
+    document.getElementById('qa-form').reset();
     sections = [];
     renderSections();
+  })
+  .catch(err => {
+    console.error("Submission error:", err);
+    document.getElementById('save-message').innerText = "Failed to save.";
+  });
+
 };
 
 renderSections();
