@@ -78,7 +78,10 @@ document.getElementById("qa-form").onsubmit = function (e) {
 
   console.log("Submitting this Q&A:", qa);
 //edit backend link here
-  fetch('https://asksunnah-backend-16oi.onrender.com/api/admin/submit', {
+  const lang = document.getElementById('qa-language').value;
+const endpoint = lang === 'ar' ? '/api/admin/submit_ar' : '/api/admin/submit';
+
+fetch(`https://asksunnah-backend-16oi.onrender.com${endpoint}`, {
   method: "POST",
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify(qa)
@@ -95,6 +98,7 @@ document.getElementById("qa-form").onsubmit = function (e) {
     document.getElementById('qa-form').reset();
     sections = [];
     renderSections();
+    console.log("Data uploaded on database")
   })
   .catch(err => {
     console.error("Submission error:", err);
