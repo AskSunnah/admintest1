@@ -1,3 +1,4 @@
+/* admin.js */
 const API_URL = "http://localhost:3000/admin/login";
 
 document.getElementById('login-btn').onclick = async function() {
@@ -21,7 +22,7 @@ localStorage.setItem('adminToken', data.token);
 
 // Redirect to Q&A panel after 0.8 seconds
 setTimeout(() => {
-    window.location.href = "admin-qa.html";
+    window.location.href = "admin-dashboard.html";
 }, 800);
 
     } else {

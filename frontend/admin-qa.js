@@ -1,76 +1,97 @@
-// Array to store dynamic sections
+/* admin-qa.js */
 let sections = [];
-
-// Section type display names
-const SECTION_LABELS = {
-    quran: "From Quran",
-    sunnah: "From Sunnah",
-    scholars: "From Scholars",
-    salaf: "From Salaf",
-    normal: "Normal Text"
-};
 
 function renderSections() {
     const container = document.getElementById('dynamic-sections');
     container.innerHTML = "";
     sections.forEach((section, idx) => {
-        const block = document.createElement('div');
-        block.className = "section-block";
-        // Section Header
-        block.innerHTML = `
-            <label>${SECTION_LABELS[section.type]}</label>
-            <textarea class="section-text" data-idx="${idx}">${section.content}</textarea>
+        let html = `<div class="section-block"><h4>${section.type}</h4>`;
+
+        if (section.type === "quran") {
+            html += `
+                <input type="text" placeholder="Reference" value="${section.reference || ''}" oninput="updateField(${idx}, 'reference', this.value)" required>
+                <textarea placeholder="Verse Text" oninput="updateField(${idx}, 'text', this.value)" required>${section.text || ''}</textarea>
+                <textarea placeholder="Commentary (optional)" oninput="updateField(${idx}, 'commentary', this.value)">${section.commentary || ''}</textarea>
+            `;
+        } else if (section.type === "sunnah") {
+            html += `
+                <input type="text" placeholder="Reference" value="${section.reference || ''}" oninput="updateField(${idx}, 'reference', this.value)" required>
+                <input type="text" placeholder="Narrator (optional)" value="${section.narrator || ''}" oninput="updateField(${idx}, 'narrator', this.value)">
+                <textarea placeholder="Hadith Text" oninput="updateField(${idx}, 'text', this.value)" required>${section.text || ''}</textarea>
+                <textarea placeholder="Commentary (optional)" oninput="updateField(${idx}, 'commentary', this.value)">${section.commentary || ''}</textarea>
+            `;
+        } else if (section.type === "salaf" || section.type === "scholar") {
+            html += `
+                <textarea placeholder="Text" oninput="updateField(${idx}, 'text', this.value)" required>${section.text || ''}</textarea>
+                <input type="text" placeholder="Reference (optional)" value="${section.reference || ''}" oninput="updateField(${idx}, 'reference', this.value)">
+            `;
+        } else if (section.type === "normal") {
+            html += `
+                <textarea placeholder="Text" oninput="updateField(${idx}, 'text', this.value)">${section.text || ''}</textarea>
+            `;
+        }
+
+        html += `
             <div class="section-btns">
-                <button type="button" onclick="moveSection(${idx},-1)">↑</button>
-                <button type="button" onclick="moveSection(${idx},1)">↓</button>
+                <button type="button" onclick="moveSection(${idx}, -1)">↑</button>
+                <button type="button" onclick="moveSection(${idx}, 1)">↓</button>
                 <button type="button" onclick="deleteSection(${idx})">Delete</button>
             </div>
-        `;
-        container.appendChild(block);
-    });
-    // Listen for edits
-    document.querySelectorAll('.section-text').forEach(area => {
-        area.oninput = function() {
-            sections[this.dataset.idx].content = this.value;
-        };
+        </div>`;
+        container.innerHTML += html;
     });
 }
 
-window.addSection = function() {
+function updateField(index, key, value) {
+    sections[index][key] = value;
+}
+
+document.getElementById('add-section-btn').onclick = () => {
     const type = document.getElementById('section-type').value;
-    sections.push({ type, content: "" });
+    const newSection = { type };
+
+    // Required initial structure
+    if (type === "quran" || type === "sunnah") {
+        newSection.reference = "";
+        newSection.text = "";
+        newSection.commentary = "";
+        if (type === "sunnah") newSection.narrator = "";
+    } else if (type === "salaf" || type === "scholar") {
+        newSection.text = "";
+        newSection.reference = "";
+    } else if (type === "normal") {
+        newSection.text = "";
+    }
+
+    sections.push(newSection);
     renderSections();
 };
 
-window.deleteSection = function(idx) {
+function deleteSection(idx) {
     sections.splice(idx, 1);
     renderSections();
-};
+}
 
-window.moveSection = function(idx, direction) {
-    // direction: -1 for up, 1 for down
-    if ((idx === 0 && direction === -1) || (idx === sections.length-1 && direction === 1)) return;
-    [sections[idx], sections[idx+direction]] = [sections[idx+direction], sections[idx]];
+function moveSection(idx, direction) {
+    if ((idx === 0 && direction === -1) || (idx === sections.length - 1 && direction === 1)) return;
+    [sections[idx], sections[idx + direction]] = [sections[idx + direction], sections[idx]];
     renderSections();
-};
+}
 
-document.getElementById('add-section-btn').onclick = addSection;
-
-// Handle Q&A save (for now, just show the JSON for testing)
-document.getElementById('qa-form').onsubmit = function(e) {
+document.getElementById('qa-form').onsubmit = function (e) {
     e.preventDefault();
-    const qa = {
+    const payload = {
         title: document.getElementById('qa-title').value,
+        slug: document.getElementById('qa-slug').value,
         question: document.getElementById('qa-question').value,
         answer: document.getElementById('qa-answer').value,
-        sections,
-        conclusion: document.getElementById('qa-conclusion').value
+        conclusion: document.getElementById('qa-conclusion').value,
+        content: sections
     };
-    // You can send qa to backend here!
+
+    console.log("Submitting this Q&A:", JSON.stringify(payload, null, 2));
     document.getElementById('save-message').innerText = "Saved! (see console for data)";
-    console.log("Q&A saved:", qa);
-    // Reset form for demo
-    document.getElementById('qa-form').reset();
+    this.reset();
     sections = [];
     renderSections();
 };

@@ -7,42 +7,44 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div id="qa-box">
-        <h2>Add a New Q&A</h2>
-        <form id="qa-form">
-            <label>Title:</label>
-            <input type="text" id="qa-title" required>
+<div id="qa-box">
+    <h2>Add a New Q&A</h2>
+    <form id="qa-form">
+        <label>Title:</label>
+        <input type="text" id="qa-title" required>
 
-            <label>Question:</label>
-            <textarea id="qa-question" required></textarea>
+        <label>Slug:</label>
+        <input type="text" id="qa-slug" required>
 
-            <label>Answer:</label>
-            <textarea id="qa-answer" required></textarea>
+        <label>Question:</label>
+        <textarea id="qa-question" required></textarea>
 
-            <hr style="margin:18px 0;">
+        <label>Answer:</label>
+        <textarea id="qa-answer" required></textarea>
 
-            <div id="dynamic-sections"></div>
+        <hr style="margin:18px 0;">
 
-            <div id="add-section-bar">
-                <select id="section-type">
-                    <option value="quran">From Quran</option>
-                    <option value="sunnah">From Sunnah</option>
-                    <option value="scholars">From Scholars</option>
-                    <option value="salaf">From Salaf</option>
-                    <option value="normal">Normal Text</option>
-                </select>
-                <button type="button" id="add-section-btn">Add Section</button>
-            </div>
+        <div id="dynamic-sections"></div>
 
-            <label>Conclusion:</label>
-<textarea id="qa-conclusion" required></textarea>
+        <div id="add-section-bar">
+            <select id="section-type">
+                <option value="quran">From Quran</option>
+                <option value="sunnah">From Sunnah</option>
+                <option value="scholar">From Scholar</option>
+                <option value="salaf">From Salaf</option>
+                <option value="normal">Normal Text</option>
+            </select>
+            <button type="button" id="add-section-btn">Add Section</button>
+        </div>
 
-            <br>
-            
-            <button type="submit" id="save-btn">Save Q&A</button>
-        </form>
-        <div id="save-message"></div>
-    </div>
-    <script src="admin-qa.js"></script>
+        <label>Conclusion:</label>
+        <textarea id="qa-conclusion" required></textarea>
+
+        <br>
+        <button type="submit" id="save-btn">Save Q&A</button>
+    </form>
+    <div id="save-message"></div>
+</div>
+<script src="admin-qa.js"></script>
 </body>
 </html>
